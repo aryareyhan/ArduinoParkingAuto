@@ -64,28 +64,40 @@ class MainActivity : AppCompatActivity() {
             slot2Card.setValue("empty")
         }
 
+        adminButton1.setOnClickListener {
+            slot1State.setValue("PARK_CAR")
+        }
+
         // Listen for changes in /slot1/state
         slot1State.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 val slot1StateValue = dataSnapshot.getValue(String::class.java).toString()
                 slot1StateTV.text = "Status : $slot1StateValue"
+                Log.d("autopark", "Slot1 : ${slot1StateTV.text}")
 
-                if (slot1StateValue == "LEAVE_CAR" || slot1StateValue.startsWith("WARNING")) {
-                    slot1CardView.setCardBackgroundColor(Color.parseColor("#61ff76"))  // or any color you want
-                    resetButton1.visibility = View.INVISIBLE
-                    adminButton1.visibility = View.INVISIBLE
+                if (slot1StateValue == "LEAVE_CAR") {
+                    slot1CardView.setCardBackgroundColor(Color.parseColor("#61ff76"))
+                    resetButton1.visibility = View.VISIBLE
+                    adminButton1.visibility = View.GONE
+                    Log.d("autopark", "if worked")
+                } else if (slot1StateValue.startsWith("WARNING")) {
+                    slot1CardView.setCardBackgroundColor(Color.parseColor("#ffe98f"))
+                    resetButton1.visibility = View.VISIBLE
+                    adminButton1.visibility = View.GONE
                 } else if (slot1StateValue == "ADMIN_RESET") {
                     slot1CardView.setCardBackgroundColor(Color.parseColor("#f57373"))
-                    resetButton1.visibility = View.INVISIBLE
+                    resetButton1.visibility = View.GONE
                     adminButton1.visibility = View.VISIBLE
                 } else {
                     slot1CardView.setCardBackgroundColor(Color.WHITE)
                     resetButton1.visibility = View.VISIBLE
-                    adminButton1.visibility = View.INVISIBLE
+                    adminButton1.visibility = View.GONE
                 }
             }
+            override fun onCancelled(error: DatabaseError) {
+                Log.w(TAG, "Failed to read value.", error.toException())
+            }
         })
-
 
         // Listen for changes in /slot1/card
         slot1Card.addValueEventListener(object : ValueEventListener {
